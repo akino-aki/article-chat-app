@@ -1,65 +1,100 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from "react";
+import { ChatArea } from "@/components/ChatArea";
+import { Header } from "@/components/Header";
+import { LeftSidebar } from "@/components/LeftSidebar";
+import { RightPanel } from "@/components/RightPanel";
+
+type Message = {
+  role: "user" | "assistant";
+  text: string;
+};
+
+type Thread = {
+  id: string;
+  title: string;
+  description: string;
+  messages: Message[];
+};
 
 export default function Home() {
+  const projects = ["AWS精読アプリ", "ブログ記事生成"];
+
+  const [threads, setThreads] = useState<Thread[]>([
+    {
+      id: "thread-1",
+      title: "Bedrock構成検討",
+      description: "AIとの会話をためて、あとで記事化するためのスレッド",
+      messages: [
+        { role: "user", text: "AIとの会話ログから記事を作るアプリを作りたいです。" },
+        { role: "assistant", text: "まずはUIを最小構成で作るのがおすすめです。" },
+      ],
+    },
+    {
+      id: "thread-2",
+      title: "AppSync調査",
+      description: "AppSync を使うべきか調べるためのスレッド",
+      messages: [
+        { role: "user", text: "AppSyncって今回の構成に合いますか？" },
+        { role: "assistant", text: "将来的に相性は良いですが、MVPならRESTでも十分です。" },
+      ],
+    },
+    {
+      id: "thread-3",
+      title: "画像アップロード案",
+      description: "記事に使う画像の扱いを考えるためのスレッド",
+      messages: [
+        { role: "user", text: "画像はチャットで貼ったものを記事に流用したいです。" },
+        { role: "assistant", text: "最初は画像一覧を右パネルに出すだけでも十分です。" },
+      ],
+    },
+  ]);
+
+  const [selectedThreadId, setSelectedThreadId] = useState("thread-1");
+
+  const selectedThread = threads.find((thread) => thread.id === selectedThreadId) ?? threads[0];
+
+  const handleSelectThread = (threadId: string) => {
+    setSelectedThreadId(threadId);
+  };
+
+  const handleSendMessage = (text: string) => {
+    if (!text.trim()) return;
+
+    setThreads((prevThreads) =>
+      prevThreads.map((thread) =>
+        thread.id === selectedThreadId
+          ? {
+              ...thread,
+              messages: [...thread.messages, { role: "user", text }],
+            }
+          : thread
+      )
+    );
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="min-h-screen bg-zinc-950 text-zinc-100">
+      <Header />
+
+      <div className="grid h-[calc(100vh-56px)] grid-cols-[260px_1fr_320px]">
+        <LeftSidebar
+          projects={projects}
+          threads={threads}
+          selectedThreadId={selectedThreadId}
+          onSelectThread={handleSelectThread}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+        <ChatArea
+          title={selectedThread.title}
+          description={selectedThread.description}
+          messages={selectedThread.messages}
+          onSendMessage={handleSendMessage}
+        />
+
+        <RightPanel />
+      </div>
+    </main>
   );
 }
