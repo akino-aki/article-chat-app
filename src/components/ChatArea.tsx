@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from "react";
+
 type Message = {
   role: "user" | "assistant";
   text: string;
@@ -7,9 +11,24 @@ type ChatAreaProps = {
   title: string;
   description: string;
   messages: Message[];
+  onSendMessage: (text: string) => void;
 };
 
-export function ChatArea({ title, description, messages }: ChatAreaProps) {
+export function ChatArea({
+  title,
+  description,
+  messages,
+  onSendMessage,
+}: ChatAreaProps) {
+  const [inputValue, setInputValue] = useState("");
+
+  const handleSend = () => {
+    if (!inputValue.trim()) return;
+
+    onSendMessage(inputValue);
+    setInputValue("");
+  };
+
   return (
     <section className="flex flex-col">
       <div className="border-b border-zinc-800 px-6 py-4">
@@ -40,11 +59,18 @@ export function ChatArea({ title, description, messages }: ChatAreaProps) {
           <button className="rounded-lg border border-zinc-700 px-4 py-2 text-sm hover:bg-zinc-900">
             + Image
           </button>
+
           <input
+            value={inputValue}
+            onChange={(event) => setInputValue(event.target.value)}
             className="flex-1 rounded-lg border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm outline-none placeholder:text-zinc-500"
             placeholder="メッセージを入力..."
           />
-          <button className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium hover:bg-blue-500">
+
+          <button
+            onClick={handleSend}
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium hover:bg-blue-500"
+          >
             Send
           </button>
         </div>
