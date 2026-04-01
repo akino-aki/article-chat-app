@@ -74,6 +74,20 @@ export default function Home() {
     );
   };
 
+  const handleAddThread = () => {
+    const newThreadId = `thread-${Date.now()}`;
+
+    const newThread: Thread = {
+      id: newThreadId,
+      title: `new Thread ${threads.length + 1}`,
+      description: "新しく作成したスレッドです。",
+      messages: [],
+    }
+
+    setThreads((prevThreads) => [...prevThreads, newThread]);
+    setSelectedThreadId(newThreadId);
+  }
+
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100">
       <Header />
@@ -84,6 +98,7 @@ export default function Home() {
           threads={threads}
           selectedThreadId={selectedThreadId}
           onSelectThread={handleSelectThread}
+          onAddThread={handleAddThread}
         />
 
         <ChatArea
